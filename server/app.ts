@@ -1,8 +1,12 @@
-import express, { NextFunction, Request, Response } from "express";
 require("dotenv").config();
+// @ts-ignore
+import express, { NextFunction, Request, Response } from "express";
 export const app = express();
+// @ts-ignore
 import cors from "cors";
+// @ts-ignore
 import cookieParser from "cookie-parser";
+import {ErrorMiddleWare} from "./middleware/error";
 
 // body parser
 app.use(express.json({ limit: "50mb" }));
@@ -30,3 +34,23 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
   err.statusCode = 404;
   next(err);
 });
+
+
+app.use(ErrorMiddleWare);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

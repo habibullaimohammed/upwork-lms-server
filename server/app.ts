@@ -1,10 +1,7 @@
 require("dotenv").config();
-// @ts-ignore
 import express, { NextFunction, Request, Response } from "express";
 export const app = express();
-// @ts-ignore
 import cors from "cors";
-// @ts-ignore
 import cookieParser from "cookie-parser";
 import {ErrorMiddleWare} from "./middleware/error";
 

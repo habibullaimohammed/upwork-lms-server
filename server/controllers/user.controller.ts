@@ -197,6 +197,8 @@ export const updateAccessToken = CatchAsyncError(async(req: Request, res: Respon
             expiresIn: "7d",
         });
 
+        req.user = user;
+
         res.cookie("access_token", accessToken, accessTokenOptions);
         res.cookie("refresh_token", refreshToken, refreshTokenOptions);
 
@@ -243,20 +245,47 @@ export const socialAuth = CatchAsyncError(async (req: Request, res: Response, ne
     }
 });
 
+// update user info
+interface IUpdateUserInfo {
+    name: string;
+    email: string;
+}
 
-// social auth 
-// export const socialAuth = CatchAsyncError(async(res: Response, req: Request, next: NextFunction) => {
-//     try {
-//         const {email, name, avatar} = req.body as ISocialAuthBody;
-//         const user = await userModel.findOne({email})
-//
-//         if (!user) {
-//             const newUser = await userModel.create({email, name, avatar});
-//             sendToken(newUser, 200, res);
-//         } else {
-//             sendToken(user, 200, res);
-//         }
-//     } catch (error: any) {
-//         return next(new ErrorHandler(error.message, 400));
-//     }
-// });
+export const updateUserInfo = CatchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const {name, email} = req.body as IUpdateUserInfo;
+        const userId = req.user?._id;
+        const user = await userModel.findById(userId);
+
+        if (email && user) {
+            const isEmailExist = await userModel.findOne({email});
+            if (isEmailExist) {
+                return next(new ErrorHandler("Email already exist", 400));
+            }
+            user.email = email;
+        }
+
+        if (name && user) {
+            user.name = name;
+        }
+
+        await user?.save();
+
+        await redis.set(userId, JSON.stringify(user));
+
+        res.status(201).json({
+            success: true,
+            user
+        })
+    } catch (error: any) {
+        return next(new ErrorHandler(error.message, 400));
+    }
+})
+
+// update user password
+
+
+
+
+
+
